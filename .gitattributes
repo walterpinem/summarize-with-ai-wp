@@ -1,15 +1,9 @@
-# Normalise line endings so a clone on any platform produces the same blobs.
-* text=auto eol=lf
+# Store LF in the repository whatever the contributor's platform, while letting
+# each checkout use its native endings. Do not force eol here: pinning the
+# working copy to LF fights core.autocrlf on Windows and leaves files showing
+# as modified forever.
+* text=auto
 
-*.php text eol=lf
-*.js  text eol=lf
-*.css text eol=lf
-*.json text eol=lf
-*.md  text eol=lf
-*.txt text eol=lf
-*.pot text eol=lf
-*.svg text eol=lf
-
-# Files that never belong in a distributed plugin ZIP.
+# Not part of a distributed plugin ZIP.
 /.gitattributes export-ignore
 /.gitignore     export-ignore
