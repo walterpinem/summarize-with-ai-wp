@@ -1,168 +1,386 @@
 /**
  * Summarize with AI - Public Styles
  *
+ * Themes restyle links, buttons and content images heavily, so this file states
+ * every property the layout depends on rather than trusting an inherited value.
+ *
+ * Three rules govern the whole file:
+ *
+ * 1. No `!important`. Everything here stays overridable by a theme, a child
+ *    theme or the customiser.
+ * 2. Specificity is kept to two or three classes: enough to win against the
+ *    usual `.entry-content a` rules, low enough that a theme author overrides
+ *    it with one more class.
+ * 3. Anything worth changing is a custom property, so a theme can retheme the
+ *    buttons without fighting selectors at all:
+ *
+ *      .share-with-ai { --swi-radius: 999px; --swi-gap: 6px; }
+ *      .summarize-with-claude { --swi-bg: #b04c2f; --swi-bg-hover: #8f3d26; }
+ *
+ * Each service button also carries its own --swi-bg / --swi-bg-hover inline,
+ * set by the renderer, so services registered through the
+ * `summarizewithai_services` filter are styled without touching this file.
+ *
  * @package SUMMARIZEAI
  */
 
+/* Custom properties: the intended override surface ------------------------- */
+
+.share-with-ai,
+.swi-google-source,
+.swi-google-source-inline {
+	--swi-radius: 6px;
+	--swi-gap: 10px;
+	--swi-pad-y: 8px;
+	--swi-pad-x: 12px;
+	--swi-font-size: 13px;
+	--swi-icon-size: 16px;
+	--swi-bg: #1e1e1e;
+	--swi-bg-hover: #3c3c3c;
+	--swi-fg: #fff;
+	--swi-gs-border: rgba(0, 0, 0, 0.22);
+	--swi-gs-surface: #fff;
+	--swi-gs-text: #1f1f1f;
+	--swi-copy-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
+}
+
+/* Wrappers ----------------------------------------------------------------- */
+
 .share-with-ai {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 20px 0;
-    padding: 15px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--swi-gap);
+	box-sizing: border-box;
+	width: auto;
+	max-width: 100%;
+	margin: 20px 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	list-style: none;
+	text-align: start;
 }
 
-.share-with-ai a {
-    outline: 0!important;
-    text-decoration: none!important;
+.share-with-ai .share-ai-text {
+	flex: 0 1 auto;
+	margin: 0;
+	margin-inline-end: 4px;
+	padding: 0;
 }
 
-.share-with-ai .share-ai.perplexity {
-    background: #20808D;
+.share-with-ai .share-ai-text span {
+	/*
+	 * Inheriting the theme's own text colour keeps the label readable on light
+	 * and dark themes alike, including themes that are dark regardless of the
+	 * visitor's system colour scheme.
+	 */
+	color: var(--swi-text, inherit);
+	font-size: 14px;
+	font-weight: 600;
+	opacity: 0.75;
 }
 
-.share-with-ai .share-ai.chatgpt,
-.share-with-ai .share-ai.grok {
-    background: #000;
+.share-with-ai .share-ai {
+	display: inline-flex;
+	flex: 0 1 auto;
+	box-sizing: border-box;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	list-style: none;
 }
 
-.share-with-ai .share-ai.claude {
-    background: #ff6b35;
+/* Buttons ------------------------------------------------------------------ */
+
+/*
+ * One reset for every button the plugin renders. `swi-btn` is a neutral hook so
+ * the shared layout survives even where a theme has claimed the older
+ * `.summarize-with-ai-icon` and `.share-ai` class names.
+ */
+.share-with-ai .swi-btn,
+.swi-google-source .swi-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	box-sizing: border-box;
+	width: auto;
+	min-width: 0;
+	max-width: 100%;
+	height: auto;
+	min-height: 0;
+	margin: 0;
+	padding: var(--swi-pad-y) var(--swi-pad-x);
+	border: 1px solid transparent;
+	border-radius: var(--swi-radius);
+	background-color: var(--swi-bg);
+	background-image: none;
+	color: var(--swi-fg);
+	font-family: inherit;
+	font-size: var(--swi-font-size);
+	font-style: normal;
+	font-weight: 500;
+	letter-spacing: normal;
+	line-height: 1.3;
+	text-align: center;
+	text-decoration: none;
+	text-shadow: none;
+	text-transform: none;
+	white-space: normal;
+	vertical-align: middle;
+	float: none;
+	opacity: 1;
+	transform: none;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+	transition: background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
 }
 
-.share-ai-text {
-    margin-right: 10px;
+.share-with-ai .swi-btn:hover,
+.swi-google-source .swi-btn:hover {
+	background-color: var(--swi-bg-hover);
+	color: var(--swi-fg);
+	text-decoration: none;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
 }
 
-.share-ai-text span {
-    font-weight: 600;
-    color: #495057;
-    font-size: 14px;
+.share-with-ai .swi-btn:focus,
+.swi-google-source .swi-btn:focus {
+	text-decoration: none;
 }
 
-.share-ai {
-    display: inline-block;
+.share-with-ai .swi-btn:focus-visible,
+.swi-google-source .swi-btn:focus-visible {
+	outline: 2px solid var(--swi-bg);
+	outline-offset: 2px;
 }
 
-.summarize-with-ai-icon {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    text-decoration: none;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+/* Themes style content images; these are interface, not content. */
+.share-with-ai .swi-btn img,
+.swi-google-source .swi-btn img {
+	display: block;
+	width: var(--swi-icon-size);
+	height: var(--swi-icon-size);
+	flex-shrink: 0;
+	box-sizing: content-box;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	vertical-align: middle;
 }
 
-.summarize-with-ai-icon:hover {
-    text-decoration: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.share-with-ai .swi-btn .swi-button-text,
+.share-with-ai .swi-btn .swi-google-source-text,
+.swi-google-source .swi-btn .swi-google-source-text {
+	color: inherit;
+	font: inherit;
+	letter-spacing: inherit;
+	text-transform: inherit;
 }
 
-.summarize-with-ai-icon img {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
+/* Copy button -------------------------------------------------------------- */
+
+.share-with-ai .swi-copy-button {
+	/* A neutral slate that keeps enough contrast on light and dark pages. */
+	--swi-bg: #5a6570;
+	--swi-bg-hover: #444d56;
 }
 
-/* Individual AI service styling */
-.summarize-with-chatgpt:hover {
-    background: #10a37f;
-    color: #ffffff;
-    border-color: #10a37f;
+.share-with-ai .swi-copy-button .swi-copy-icon {
+	display: block;
+	width: var(--swi-icon-size);
+	height: var(--swi-icon-size);
+	flex-shrink: 0;
+	background-color: currentColor;
+	-webkit-mask: var(--swi-copy-mask) no-repeat center / contain;
+	mask: var(--swi-copy-mask) no-repeat center / contain;
 }
 
-.summarize-with-grok:hover {
-    background: #000;
-    color: #ffffff;
-    border-color: #000;
+.share-with-ai .swi-copy-button.is-copied {
+	background-color: var(--swi-bg-hover);
 }
 
-.summarize-with-perplexity:hover {
-    background: #20808d;
-    color: #ffffff;
-    border-color: #20808d;
+/* Style variants ----------------------------------------------------------- */
+
+.swi-style-outline .swi-btn,
+.swi-style-minimal .swi-btn {
+	background-color: transparent;
+	color: inherit;
+	box-shadow: none;
 }
 
-.summarize-with-claude {
-    border-color: #d77655;
-    background: #d77655;
+.swi-style-outline .swi-btn {
+	border-color: currentColor;
+	opacity: 0.85;
 }
 
-.summarize-with-claude:hover {
-    background: #d77655;
-    color: #ffffff;
-    border-color: #d77655;
+.swi-style-outline .swi-btn:hover,
+.swi-style-minimal .swi-btn:hover {
+	background-color: transparent;
+	color: var(--swi-bg-hover);
+	box-shadow: none;
+	opacity: 1;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-    .share-with-ai {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .share-ai-text {
-        margin-right: 0;
-        margin-bottom: 5px;
-    }
-
-    .share-ai {
-        display: block;
-        width: 100%;
-    }
-
-    .summarize-with-ai-icon {
-        display: flex;
-        width: 100%;
-        justify-content: center;
-        padding: 12px;
-    }
+.swi-style-minimal .swi-btn {
+	padding: 6px 4px;
 }
 
-@media (max-width: 480px) {
-    .share-with-ai {
-        padding: 12px;
-        margin: 15px 0;
-    }
-
-    .summarize-with-ai-icon {
-        font-size: 14px;
-        padding: 10px;
-    }
-
-    .summarize-with-ai-icon img {
-        width: 18px;
-        height: 18px;
-    }
+/*
+ * The service icons are white glyphs, so outside the filled style they need a
+ * brand coloured chip behind them to stay visible on a light page.
+ */
+.swi-style-outline .summarize-with-ai-icon img,
+.swi-style-minimal .summarize-with-ai-icon img {
+	padding: 3px;
+	border-radius: 4px;
+	background-color: var(--swi-bg);
 }
 
-/* Dark theme support */
+/* Layout variants ---------------------------------------------------------- */
+
+.swi-layout-stacked {
+	align-items: stretch;
+	flex-direction: column;
+}
+
+.swi-layout-stacked .share-ai,
+.swi-layout-stacked .swi-google-source-inline {
+	display: block;
+	width: 100%;
+}
+
+.swi-layout-stacked .swi-btn {
+	width: 100%;
+	padding: 12px;
+}
+
+.swi-icons-only .swi-btn {
+	padding: var(--swi-pad-y);
+}
+
+/* Google preferred source ---------------------------------------------------
+ *
+ * Google's mark is multicolour, so this button keeps a neutral surface and a
+ * border rather than a brand fill: the four-colour G has to sit on white or a
+ * very light ground to stay legible, in every style variant.
+ */
+
+.swi-google-source {
+	display: flex;
+	box-sizing: border-box;
+	max-width: 100%;
+	margin: 20px 0;
+	padding: 0;
+}
+
+.swi-google-source.swi-align-center {
+	justify-content: center;
+}
+
+.swi-google-source.swi-align-right {
+	justify-content: flex-end;
+}
+
+.swi-google-source-inline {
+	display: inline-flex;
+	flex: 0 1 auto;
+	box-sizing: border-box;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.share-with-ai .swi-google-source-button,
+.swi-google-source .swi-google-source-button {
+	border-color: var(--swi-gs-border);
+	background-color: var(--swi-gs-surface);
+	color: var(--swi-gs-text);
+	opacity: 1;
+}
+
+.share-with-ai .swi-google-source-button:hover,
+.swi-google-source .swi-google-source-button:hover {
+	border-color: rgba(0, 0, 0, 0.4);
+	background-color: var(--swi-gs-surface);
+	color: var(--swi-gs-text);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.share-with-ai .swi-google-source-button:focus-visible,
+.swi-google-source .swi-google-source-button:focus-visible {
+	outline: 2px solid #4285f4;
+	outline-offset: 2px;
+}
+
+.swi-google-source .swi-google-source-button--standalone {
+	--swi-radius: 999px;
+	--swi-pad-y: 10px;
+	--swi-pad-x: 18px;
+	--swi-font-size: 15px;
+	--swi-icon-size: 20px;
+
+	box-shadow: none;
+}
+
+/* Screen reader text, in case the active theme does not define it. */
+.share-with-ai .screen-reader-text,
+.swi-google-source .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	border: 0;
+	word-wrap: normal;
+}
+
+/* Responsive --------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+	.swi-layout-inline .share-ai-text {
+		flex-basis: 100%;
+		margin-inline-end: 0;
+	}
+}
+
+/* Colour scheme ------------------------------------------------------------ */
+
+/*
+ * The Google surface stays light in dark mode so the multicolour mark keeps its
+ * contrast; only the border is lifted so the pill still reads as an edge.
+ */
 @media (prefers-color-scheme: dark) {
-    .share-with-ai {
-        background: #2d3748;
-        border-color: #4a5568;
-    }
-
-    .share-ai-text span {
-        color: #e2e8f0;
-    }
-
-    .summarize-with-ai-icon {
-        background: #4a5568;
-        border-color: #718096;
-        color: #e2e8f0;
-    }
+	.share-with-ai,
+	.swi-google-source,
+	.swi-google-source-inline {
+		--swi-gs-border: rgba(255, 255, 255, 0.35);
+	}
 }
 
-/* Print styles */
+/* Motion and print --------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+	.share-with-ai .swi-btn,
+	.swi-google-source .swi-btn {
+		transition: none;
+	}
+}
+
 @media print {
-    .share-with-ai {
-        display: none;
-    }
+	.share-with-ai,
+	.swi-google-source {
+		display: none;
+	}
 }

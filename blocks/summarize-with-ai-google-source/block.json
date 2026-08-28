@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "summarizewithai/google-source",
+	"title": "Add as Preferred Source on Google",
+	"category": "widgets",
+	"icon": "star-filled",
+	"description": "A button inviting readers to add this site as a preferred source in Google Search.",
+	"keywords": [ "google", "preferred", "source", "seo", "follow" ],
+	"textdomain": "summarize-with-ai",
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	},
+	"attributes": {
+		"label": {
+			"type": "string"
+		},
+		"align": {
+			"type": "string",
+			"default": "left"
+		}
+	},
+	"editorScript": "summarize-with-ai-block",
+	"style": "summarize-with-ai"
+}

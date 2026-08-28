@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "summarizewithai/buttons",
+	"title": "Summarize with AI",
+	"category": "widgets",
+	"icon": "share",
+	"description": "Buttons that send the current post to ChatGPT, Claude, Grok, Perplexity or Google AI Mode for a summary.",
+	"keywords": [ "ai", "summarize", "chatgpt", "claude", "share" ],
+	"textdomain": "summarize-with-ai",
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	},
+	"attributes": {
+		"services": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"label": {
+			"type": "string"
+		},
+		"buttonStyle": {
+			"type": "string"
+		},
+		"layout": {
+			"type": "string"
+		},
+		"showText": {
+			"type": "boolean",
+			"default": true
+		},
+		"showCopy": {
+			"type": "boolean",
+			"default": false
+		},
+		"googleSource": {
+			"type": "string",
+			"default": "auto"
+		}
+	},
+	"editorScript": "summarize-with-ai-block",
+	"style": "summarize-with-ai"
+}

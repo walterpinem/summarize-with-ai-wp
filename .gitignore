@@ -1,0 +1,23 @@
+# Compiled translations: only the .pot and .po sources belong in the repo.
+languages/*.mo
+
+# Dependencies and build output, should this ever gain a toolchain.
+node_modules/
+vendor/
+build/
+
+# Editor and OS noise.
+.idea/
+.vscode/
+*.sublime-*
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local scratch files.
+*.log
+*.bak
+*.orig
+*.rej
+*~
+swi-*-temp.html
