@@ -146,10 +146,22 @@ if exist "!ZIPPATH!" (
 
 echo  Creating !ZIPNAME! ...
 
-rem includeBaseDirectory is false and the staging root holds one folder, so the
-rem ZIP opens straight onto %SLUG%\ exactly as WordPress expects.
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory('%CD%\%STAGE%', '!ZIPPATH!', [System.IO.Compression.CompressionLevel]::Optimal, $false)"
+rem Entry names are built by hand rather than with CreateFromDirectory.
+rem
+rem The ZIP format requires forward slashes, but CreateFromDirectory on .NET
+rem Framework, which is what Windows PowerShell 5.1 runs on, writes the platform
+rem separator instead. The resulting archive looks fine on Windows and then
+rem extracts on a Linux host as one flat pile of files literally named
+rem "summarize-with-ai-wpdmin\settings.php", which breaks the plugin.
+rem
+rem So: open the archive, add each file under a name we control, then reopen it
+rem and refuse to ship if a single entry still carries a backslash.
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; Add-Type -AssemblyName System.IO.Compression.FileSystem; $sep=[string][char]92; $src=(Resolve-Path ('%CD%' + $sep + '%STAGE%')).Path; $dst='!ZIPPATH!'; $zip=[System.IO.Compression.ZipFile]::Open($dst,'Create'); Get-ChildItem -LiteralPath $src -Recurse -File ^| Sort-Object FullName ^| ForEach-Object { $rel=$_.FullName.Substring($src.Length+1).Replace($sep,'/'); [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,$_.FullName,$rel,'Optimal') }; $zip.Dispose(); $chk=[System.IO.Compression.ZipFile]::OpenRead($dst); $all=@($chk.Entries); $bad=@($all ^| Where-Object { $_.FullName.Contains($sep) }); $n=$all.Count; $b=$bad.Count; $chk.Dispose(); if ($b -gt 0) { Write-Host ('   ERROR: ' + $b + ' of ' + $n + ' entries use backslashes'); exit 1 }; Write-Host ('   ' + $n + ' entries, all forward slashes')"
+
+if errorlevel 1 (
+    echo  ERROR: the archive was written with invalid path separators.
+    goto :fail
+)
 
 if not exist "!ZIPPATH!" (
     echo  ERROR: the ZIP was not created.

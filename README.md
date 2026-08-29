@@ -350,6 +350,16 @@ Development files are excluded: `.git`, `_dev`, `dist`, `build.bat`,
 It needs nothing installed beyond Windows itself: `robocopy` for the copy and
 PowerShell for the archive.
 
+The archive entries are written one at a time under names the script controls,
+rather than with `ZipFile::CreateFromDirectory`. On .NET Framework, which is
+what Windows PowerShell 5.1 runs on, that method writes the *platform*
+separator into entry names. The ZIP format requires forward slashes, so the
+result looks correct on Windows and then unpacks on a Linux host as a flat pile
+of files literally named `summarize-with-ai-wpdmin\settings.php`. PowerShell
+7 fixed it; 5.1 is what a double-clicked `.bat` gets. After writing the archive
+the script reopens it and refuses to ship if any entry still contains a
+backslash.
+
 ## Changelog
 
 See [readme.txt](readme.txt) for the full changelog.
