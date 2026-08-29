@@ -152,7 +152,7 @@ rem The ZIP format requires forward slashes, but CreateFromDirectory on .NET
 rem Framework, which is what Windows PowerShell 5.1 runs on, writes the platform
 rem separator instead. The resulting archive looks fine on Windows and then
 rem extracts on a Linux host as one flat pile of files literally named
-rem "summarize-with-ai-wpdmin\settings.php", which breaks the plugin.
+rem "summarize-with-ai-wp\admin\settings.php", which breaks the plugin.
 rem
 rem So: open the archive, add each file under a name we control, then reopen it
 rem and refuse to ship if a single entry still carries a backslash.
