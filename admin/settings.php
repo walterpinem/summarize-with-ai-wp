@@ -95,7 +95,39 @@ $swi_tabs = array(
 								?>
 							</p>
 
-							<table class="widefat striped summarizewithai-placeholders">
+							<?php
+						$swi_preview = summarizewithai_get_prompt_preview();
+						?>
+						<div class="swi-callout">
+							<h4><?php esc_html_e( 'What your readers actually send', 'summarize-with-ai' ); ?></h4>
+							<p class="swi-prompt-preview"><?php echo esc_html( $swi_preview['prompt'] ); ?></p>
+							<p class="description">
+								<?php
+								if ( $swi_preview['post'] ) {
+									printf(
+										/* translators: %s: post title used for the preview. */
+										esc_html__( 'Resolved against your most recent post, %s. Each page fills in its own values.', 'summarize-with-ai' ),
+										'<em>' . esc_html( get_the_title( $swi_preview['post'] ) ) . '</em>'
+									);
+								} else {
+									esc_html_e( 'Publish a post to see the placeholders resolved against real content.', 'summarize-with-ai' );
+								}
+
+								echo ' ';
+
+								printf(
+									/* translators: 1: current prompt length, 2: maximum link length. */
+									esc_html__( 'Length: %1$d characters once encoded, out of roughly %2$d available.', 'summarize-with-ai' ),
+									strlen( rawurlencode( $swi_preview['prompt'] ) ),
+									(int) SWI_MAX_URL_LENGTH
+								);
+								?>
+							</p>
+						</div>
+
+						<p class="description"><strong><?php esc_html_e( 'Placeholders you can use', 'summarize-with-ai' ); ?></strong></p>
+
+						<table class="widefat striped summarizewithai-placeholders">
 								<thead>
 									<tr>
 										<th scope="col"><?php esc_html_e( 'Placeholder', 'summarize-with-ai' ); ?></th>
@@ -144,6 +176,12 @@ $swi_tabs = array(
 		<div class="swi-tab-panel" id="swi-panel-services">
 			<h2 class="title"><?php esc_html_e( 'AI Services', 'summarize-with-ai' ); ?></h2>
 			<p class="description"><?php esc_html_e( 'Enable the services you want to show and, if needed, adjust the URL each button points to. Buttons appear in the order listed here.', 'summarize-with-ai' ); ?></p>
+			<p class="description">
+				<?php esc_html_e( 'Each button is an ordinary link. Clicking one opens that service with your prompt already typed in. There is no API call, no API key and no cost, and nothing is sent from your server.', 'summarize-with-ai' ); ?>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'You rarely need to touch the URL fields. They exist so you can follow a service if it moves, or point a button somewhere else entirely.', 'summarize-with-ai' ); ?>
+			</p>
 
 			<table class="form-table" role="presentation">
 				<tbody>
@@ -209,7 +247,10 @@ $swi_tabs = array(
 		<!-- Placement ---------------------------------------------------- -->
 		<div class="swi-tab-panel" id="swi-panel-placement">
 			<h2 class="title"><?php esc_html_e( 'Placement', 'summarize-with-ai' ); ?></h2>
-			<p class="description"><?php esc_html_e( 'Where the buttons appear without adding a shortcode or a block by hand.', 'summarize-with-ai' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Where the buttons appear without adding a shortcode or a block by hand. For most sites this tab is the only one you need.', 'summarize-with-ai' ); ?></p>
+			<p class="description">
+				<?php esc_html_e( 'Automatic placement runs on single posts only, never on archives, category pages or the home page.', 'summarize-with-ai' ); ?>
+			</p>
 
 			<table class="form-table" role="presentation">
 				<tbody>
@@ -283,7 +324,30 @@ $swi_tabs = array(
 		<!-- Appearance --------------------------------------------------- -->
 		<div class="swi-tab-panel" id="swi-panel-appearance">
 			<h2 class="title"><?php esc_html_e( 'Appearance', 'summarize-with-ai' ); ?></h2>
-			<p class="description"><?php esc_html_e( 'How the buttons look on the front end.', 'summarize-with-ai' ); ?></p>
+			<p class="description"><?php esc_html_e( 'How the buttons look on the front end. The preview below updates as you change these settings, before you save.', 'summarize-with-ai' ); ?></p>
+
+			<div class="swi-preview-frame">
+				<div class="swi-preview-bar">
+					<span><?php esc_html_e( 'Live preview', 'summarize-with-ai' ); ?></span>
+					<label class="swi-preview-toggle">
+						<input type="checkbox" id="swi-preview-dark" />
+						<?php esc_html_e( 'Dark background', 'summarize-with-ai' ); ?>
+					</label>
+				</div>
+				<div class="swi-preview-stage" id="swi-preview-stage">
+					<?php
+					// Real front-end markup, rendered with every service on so the
+					// script can show and hide them as the checkboxes change.
+					echo summarizewithai_render( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside the renderer.
+						array(
+							'services'      => implode( ',', array_keys( $swi_services ) ),
+							'copy'          => 'yes',
+							'google_source' => 'no',
+						)
+					);
+					?>
+				</div>
+			</div>
 
 			<table class="form-table" role="presentation">
 				<tbody>
@@ -321,6 +385,9 @@ $swi_tabs = array(
 									</option>
 								<?php endforeach; ?>
 							</select>
+							<p class="description">
+								<?php esc_html_e( 'Filled uses each service brand colour and stands out most. Outline keeps a border only, which suits restrained designs. Minimal drops the button shape entirely and leaves the icon and name.', 'summarize-with-ai' ); ?>
+							</p>
 						</td>
 					</tr>
 
@@ -333,6 +400,9 @@ $swi_tabs = array(
 								<option value="inline" <?php selected( $swi_options['layout'], 'inline' ); ?>><?php esc_html_e( 'Inline (wraps on small screens)', 'summarize-with-ai' ); ?></option>
 								<option value="stacked" <?php selected( $swi_options['layout'], 'stacked' ); ?>><?php esc_html_e( 'Stacked (full width buttons)', 'summarize-with-ai' ); ?></option>
 							</select>
+							<p class="description">
+								<?php esc_html_e( 'Inline suits a row inside an article. Stacked suits a narrow sidebar, or a long list of services.', 'summarize-with-ai' ); ?>
+							</p>
 						</td>
 					</tr>
 

@@ -234,6 +234,105 @@
 		}
 	}
 
+	/*
+	 * Live preview.
+	 *
+	 * The stage holds real front-end markup with every service rendered, so the
+	 * appearance settings can be reflected by toggling the same classes the
+	 * renderer would emit. Nothing here touches the saved options; it only shows
+	 * what saving would produce.
+	 */
+	var stage = document.getElementById( 'swi-preview-stage' );
+
+	if ( stage ) {
+		var row = stage.querySelector( '.share-with-ai' );
+		var field = function ( name ) {
+			return wrap.querySelector( '[name="summarizewithai_options[' + name + ']"]' );
+		};
+
+		var styleField = field( 'button_style' );
+		var layoutField = field( 'layout' );
+		var textField = field( 'show_button_text' );
+		var labelField = field( 'summarize_label' );
+		var copyField = field( 'enable_copy' );
+		var darkToggle = document.getElementById( 'swi-preview-dark' );
+
+		var refresh = function () {
+			if ( ! row ) {
+				return;
+			}
+
+			var style = styleField ? styleField.value : 'filled';
+			var layout = layoutField ? layoutField.value : 'inline';
+
+			[ 'filled', 'outline', 'minimal' ].forEach( function ( name ) {
+				row.classList.toggle( 'swi-style-' + name, name === style );
+			} );
+
+			[ 'inline', 'stacked' ].forEach( function ( name ) {
+				row.classList.toggle( 'swi-layout-' + name, name === layout );
+			} );
+
+			var showText = ! textField || textField.checked;
+
+			row.classList.toggle( 'swi-icons-only', ! showText );
+
+			// The renderer swaps these two classes; mirror that so the preview
+			// hides the names rather than merely shrinking the buttons.
+			Array.prototype.forEach.call(
+				row.querySelectorAll( '.swi-button-text, .screen-reader-text' ),
+				function ( span ) {
+					if ( span.closest( '.swi-google-source-inline' ) ) {
+						return;
+					}
+
+					span.className = showText ? 'swi-button-text' : 'screen-reader-text';
+				}
+			);
+
+			var labelWrap = row.querySelector( '.share-ai-text' );
+			var labelText = labelField ? labelField.value.trim() : '';
+
+			if ( labelWrap ) {
+				labelWrap.hidden = '' === labelText;
+				var labelSpan = labelWrap.querySelector( 'span' );
+
+				if ( labelSpan && '' !== labelText ) {
+					labelSpan.textContent = labelText;
+				}
+			}
+
+			var copyWrap = row.querySelector( '.swi-copy' );
+
+			if ( copyWrap ) {
+				copyWrap.hidden = !! ( copyField && ! copyField.checked );
+			}
+
+			// Enabled services.
+			Array.prototype.forEach.call(
+				wrap.querySelectorAll( '[name="summarizewithai_options[enabled_services][]"]' ),
+				function ( box ) {
+					var cell = row.querySelector( '.share-ai.' + box.value );
+
+					if ( cell ) {
+						cell.hidden = ! box.checked;
+					}
+				}
+			);
+		};
+
+		wrap.addEventListener( 'change', refresh );
+		wrap.addEventListener( 'input', refresh );
+
+		if ( darkToggle ) {
+			darkToggle.addEventListener( 'change', function () {
+				stage.classList.toggle( 'is-dark', darkToggle.checked );
+			} );
+		}
+
+		refresh();
+	}
+
 	wrap.addEventListener( 'click', function ( event ) {
 		var button = event.target.closest ? event.target.closest( '.swi-snippet-copy' ) : null;
 

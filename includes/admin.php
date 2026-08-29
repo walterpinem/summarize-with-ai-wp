@@ -92,6 +92,11 @@ function summarizewithai_admin_enqueue_styles( $hook_suffix ) {
 		SWI_VERSION,
 		true
 	);
+
+	// The live preview renders real front-end markup, so it needs the real
+	// front-end stylesheet.
+	summarizewithai_register_assets();
+	wp_enqueue_style( 'summarize-with-ai' );
 }
 add_action( 'admin_enqueue_scripts', 'summarizewithai_admin_enqueue_styles' );
 
@@ -164,6 +169,132 @@ function summarizewithai_admin_notices() {
 	);
 }
 add_action( 'admin_notices', 'summarizewithai_admin_notices' );
+
+/**
+ * Build the prompt exactly as a visitor would see it, for the settings preview.
+ *
+ * There is no post in scope on an admin screen, so the newest published post is
+ * borrowed and the previous global restored afterwards.
+ *
+ * @since 1.1.0
+ *
+ * @param string $template Optional. Prompt template. Defaults to the saved prompt.
+ * @return array{prompt:string,post:WP_Post|null} Resolved prompt and the post it used.
+ */
+function summarizewithai_get_prompt_preview( $template = '' ) {
+	$posts = get_posts(
+		array(
+			'numberposts'      => 1,
+			'post_status'      => 'publish',
+			'suppress_filters' => false,
+		)
+	);
+
+	if ( empty( $posts ) ) {
+		return array(
+			'prompt' => summarizewithai_build_prompt( $template ),
+			'post'   => null,
+		);
+	}
+
+	$previous        = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+	$GLOBALS['post'] = $posts[0]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored below.
+	$prompt          = summarizewithai_build_prompt( $template );
+	$GLOBALS['post'] = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring.
+
+	return array(
+		'prompt' => $prompt,
+		'post'   => $posts[0],
+	);
+}
+
+/**
+ * Add WordPress's own contextual help to the settings screen.
+ *
+ * This is where a walkthrough belongs: reachable from the Help button on every
+ * tab, without pushing the settings themselves further down the page.
+ *
+ * @since 1.1.0
+ *
+ * @return void
+ */
+function summarizewithai_add_help_tabs() {
+	$screen = get_current_screen();
+
+	if ( ! $screen || 'settings_page_summarize-with-ai' !== $screen->id ) {
+		return;
+	}
+
+	$screen->add_help_tab(
+		array(
+			'id'      => 'summarizewithai-start',
+			'title'   => __( 'Getting started', 'summarize-with-ai' ),
+			'content' =>
+				'<p>' . esc_html__( 'Three steps and you are done:', 'summarize-with-ai' ) . '</p>'
+				. '<ol>'
+				. '<li>' . esc_html__( 'On the AI Services tab, tick the assistants your readers actually use. All five are on by default.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . esc_html__( 'On the Placement tab, choose whether the buttons appear before or after your content, and pick the post types. That is the only step most sites need.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . esc_html__( 'Open one of those posts on the front end and click a button to see exactly what your readers get.', 'summarize-with-ai' ) . '</li>'
+				. '</ol>'
+				. '<p>' . esc_html__( 'Prefer to place the buttons yourself? Leave automatic placement off and use the block or the shortcode instead. Both are on the Usage tab.', 'summarize-with-ai' ) . '</p>',
+		)
+	);
+
+	$screen->add_help_tab(
+		array(
+			'id'      => 'summarizewithai-prompt',
+			'title'   => __( 'Writing a good prompt', 'summarize-with-ai' ),
+			'content' =>
+				'<p>' . esc_html__( 'The prompt is the message your reader sends to the AI. It travels inside the link, so the AI receives it the moment the page opens.', 'summarize-with-ai' ) . '</p>'
+				. '<ul>'
+				. '<li>' . esc_html__( 'Always include {url}. Without it the AI has no idea which page to read.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . esc_html__( 'Say what a good answer looks like: a word count, whether to use headings, whether to mention images.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . esc_html__( 'Keep it honest. Anyone can read the prompt in the link, so a prompt that quietly tells the AI to promote you is visible to the people you would be hiding it from.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . sprintf(
+					/* translators: %d: maximum number of characters in a generated link. */
+					esc_html__( 'Keep it short. The whole link is trimmed at %d characters, so a very long prompt loses its ending.', 'summarize-with-ai' ),
+					(int) SWI_MAX_URL_LENGTH
+				) . '</li>'
+				. '</ul>'
+				. '<p>' . esc_html__( 'The preview under the prompt field shows exactly what gets sent, resolved against your most recent post.', 'summarize-with-ai' ) . '</p>',
+		)
+	);
+
+	$screen->add_help_tab(
+		array(
+			'id'      => 'summarizewithai-google',
+			'title'   => __( 'Preferred sources', 'summarize-with-ai' ),
+			'content' =>
+				'<p>' . esc_html__( 'The Google button is not a summarize button. It asks a reader to mark your site as a preferred source in Google Search, which changes what that reader sees in Top Stories, and in AI Overviews and AI Mode where those exist.', 'summarize-with-ai' ) . '</p>'
+				. '<p>' . esc_html__( 'It does not change your rankings for everyone and it does not guarantee placement. Your site also has to appear in the Google source preferences tool already, and only domains and subdomains are eligible, never subdirectories.', 'summarize-with-ai' ) . '</p>'
+				. '<p>' . esc_html__( 'You can render the plugin link, which contacts nobody, or the official Google button, which loads a script from news.google.com on pages where it appears.', 'summarize-with-ai' ) . '</p>',
+		)
+	);
+
+	$screen->add_help_tab(
+		array(
+			'id'      => 'summarizewithai-trouble',
+			'title'   => __( 'Buttons not showing?', 'summarize-with-ai' ),
+			'content' =>
+				'<ul>'
+				. '<li>' . esc_html__( 'Check that at least one service is ticked on the AI Services tab.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . esc_html__( 'Check the post type is ticked on the Placement tab. Automatic placement only runs on single posts, never on archives or the home page.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . esc_html__( 'Check the post ID is not in the exclusion list.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . esc_html__( 'Automatic placement is skipped on any post that already contains the shortcode or the block, so you never get two sets on one page.', 'summarize-with-ai' ) . '</li>'
+				. '<li>' . esc_html__( 'Clear your caching plugin. The buttons are part of the cached HTML.', 'summarize-with-ai' ) . '</li>'
+				. '</ul>',
+		)
+	);
+
+	$screen->set_help_sidebar(
+		'<p><strong>' . esc_html__( 'More information', 'summarize-with-ai' ) . '</strong></p>'
+		. '<p><a href="https://github.com/walterpinem/summarize-with-ai-wp" target="_blank" rel="noopener noreferrer">'
+		. esc_html__( 'Documentation on GitHub', 'summarize-with-ai' ) . '</a></p>'
+		. '<p><a href="https://developers.google.com/search/docs/appearance/preferred-sources" target="_blank" rel="noopener noreferrer">'
+		. esc_html__( 'Google preferred sources docs', 'summarize-with-ai' ) . '</a></p>'
+	);
+}
+add_action( 'current_screen', 'summarizewithai_add_help_tabs' );
 
 /**
  * Run one-time upgrade routines when the stored version is behind the code.

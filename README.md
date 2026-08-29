@@ -22,6 +22,7 @@ For the full write-up, see **[Summarize with AI WordPress Plugin](https://walter
 - **"Add as a preferred source on Google" button** — its own shortcode, block and settings tab, so readers can nominate your site in Google Search.
 - **Optional click tracking** via the `gtag()` or `dataLayer` your site already loads. Off by default.
 - **Conditional assets** — CSS and JS load only on pages that render the buttons.
+- **Live preview in the settings** — the Appearance tab shows real buttons updating as you change style, layout, label and services, before you save.
 - **Translation ready**, with `languages/summarize-with-ai.pot` included.
 
 ## Requirements

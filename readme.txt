@@ -119,6 +119,9 @@ The whole link, prompt included, is trimmed to 1800 characters so browsers and C
 * Fixed: a prompt containing {excerpt} could exhaust PHP's memory on any post without a hand-written excerpt, because generating one re-runs the content filters and re-entered the placement filter.
 * Changed: the excerpt and category placeholders are resolved only when the text being rendered actually uses them.
 * Changed: the Usage tab is now a set of cards with copyable snippets rather than read-only form fields.
+* Added: a live preview on the Appearance tab that updates as you change the style, layout, label, services and copy button, before you save, with a dark background toggle for checking against dark themes.
+* Added: a preview of the resolved prompt on the Prompt tab, showing exactly what a reader sends and how long it is against the link limit.
+* Added: WordPress contextual help on the settings screen, covering getting started, writing a good prompt, preferred sources and why buttons might not appear.
 * Changed: the stylesheet now states every property the layout depends on instead of trusting inherited values, and exposes CSS custom properties (--swi-radius, --swi-bg, --swi-gs-surface and friends) as the override surface. Still no !important anywhere.
 * Fixed: the Google button was invisible on themes that force a white text colour on the AI buttons, because it wore the same classes. It now uses its own, so theme rules written for AI service buttons no longer reach it.
 * Note: only assistants with a verified prefill parameter are bundled. Gemini and Copilot are excluded because theirs do not work; the copy-prompt button covers them.

@@ -60,6 +60,86 @@
 	padding: 6px 10px;
 }
 
+/* Live preview and callouts ------------------------------------------------ */
+
+.swi-preview-frame {
+	max-width: 900px;
+	margin: 16px 0 24px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+	overflow: hidden;
+}
+
+.swi-preview-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 8px 14px;
+	border-bottom: 1px solid #f0f0f1;
+	background: #fbfbfc;
+	color: #646970;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.swi-preview-toggle {
+	font-weight: 400;
+	text-transform: none;
+	letter-spacing: normal;
+	cursor: pointer;
+}
+
+.swi-preview-stage {
+	padding: 8px 18px;
+	background: #fff;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Lets an editor check the buttons against a dark theme without leaving the page. */
+.swi-preview-stage.is-dark {
+	background: #16181d;
+	color: #e2e8f0;
+}
+
+.swi-preview-stage .share-with-ai {
+	margin: 14px 0;
+}
+
+.swi-callout {
+	max-width: 780px;
+	margin: 14px 0 18px;
+	padding: 12px 16px;
+	border: 1px solid #dcdcde;
+	border-left: 4px solid #72aee6;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.swi-callout h4 {
+	margin: 0 0 8px;
+	font-size: 13px;
+}
+
+.swi-callout p:last-child {
+	margin-bottom: 0;
+}
+
+.swi-prompt-preview {
+	margin: 0 0 8px;
+	padding: 10px 12px;
+	border-radius: 4px;
+	background: #f6f7f7;
+	color: #1d2327;
+	font-family: Consolas, Monaco, "Andale Mono", monospace;
+	font-size: 12px;
+	line-height: 1.6;
+	word-break: break-word;
+}
+
 /* Usage tab ---------------------------------------------------------------- */
 
 .swi-usage-grid {
