@@ -4,6 +4,11 @@
 # as modified forever.
 * text=auto
 
+# Batch files are the one exception. cmd.exe needs CRLF: with LF endings it
+# fails to resolve GOTO labels, so an abort silently falls through instead.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
 # Not part of a distributed plugin ZIP.
 /.gitattributes export-ignore
 /.gitignore     export-ignore

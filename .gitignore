@@ -1,6 +1,10 @@
 # Compiled translations: only the .pot and .po sources belong in the repo.
 languages/*.mo
 
+# Build output. The release ZIPs are attached to GitHub releases, not committed.
+dist/
+.build/
+
 # Dependencies and build output, should this ever gain a toolchain.
 node_modules/
 vendor/

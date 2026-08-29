@@ -325,6 +325,31 @@ Regenerate the translation template after changing any string:
 wp i18n make-pot . languages/summarize-with-ai.pot
 ```
 
+### Building a release
+
+Double-click **`build.bat`**, or run it from a terminal. It produces
+`dist/summarize-with-ai-wp-<version>.zip`, ready to upload through
+**Plugins → Add New → Upload Plugin**.
+
+The folder inside the ZIP is `summarize-with-ai-wp`, matching this repository's
+slug, so WordPress treats the upload as an update to an existing install rather
+than a second copy of the plugin. Nothing in the code hardcodes a folder name;
+every path derives from `__FILE__`.
+
+It refuses to build if:
+
+- the `Version:` header, the `SWI_VERSION` constant and `readme.txt`'s
+  `Stable tag:` disagree, which would ship an update that never triggers or a
+  changelog describing the wrong release;
+- any PHP file has a syntax error (skipped if PHP is not on `PATH`, though it
+  also looks in the usual Laragon locations).
+
+Development files are excluded: `.git`, `_dev`, `dist`, `build.bat`,
+`.gitignore` and `.gitattributes` never reach the ZIP.
+
+It needs nothing installed beyond Windows itself: `robocopy` for the copy and
+PowerShell for the archive.
+
 ## Changelog
 
 See [readme.txt](readme.txt) for the full changelog.
