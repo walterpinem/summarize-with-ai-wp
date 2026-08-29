@@ -64,6 +64,163 @@ function summarizewithai_resolve_google_source_position( $value = 'auto' ) {
 }
 
 /**
+ * Whether the value the user typed pointed at a subdirectory.
+ *
+ * Google's preferred sources tool accepts domains and subdomains only, so a
+ * path is always dropped. Detecting it lets the settings screen say so rather
+ * than silently changing what the publisher asked for.
+ *
+ * @since 1.1.0
+ *
+ * @param string $value Raw domain or URL as entered.
+ * @return bool True when a path beyond the host was supplied.
+ */
+function summarizewithai_looks_like_subdirectory( $value ) {
+	$value = trim( (string) $value );
+
+	if ( '' === $value ) {
+		return false;
+	}
+
+	if ( ! preg_match( '#^https?://#i', $value ) ) {
+		$value = 'https://' . ltrim( $value, '/' );
+	}
+
+	$path = wp_parse_url( $value, PHP_URL_PATH );
+
+	return is_string( $path ) && '' !== trim( $path, '/' );
+}
+
+/**
+ * Register Google's own preferred-source button library.
+ *
+ * Google asks for this in the head, and it is only ever enqueued when the
+ * official button is both selected and expected to render, so a site using the
+ * plugin's own link makes no request to Google at all.
+ *
+ * @since 1.1.0
+ *
+ * @return void
+ */
+function summarizewithai_register_google_button_script() {
+	wp_register_script(
+		'google-swg-publisher',
+		'https://news.google.com/swg/js/v1/publisher.js',
+		array(),
+		null, // Google versions this URL itself; a ?ver= query would only break caching.
+		false // In the head, as Google's documentation asks.
+	);
+}
+add_action( 'wp_enqueue_scripts', 'summarizewithai_register_google_button_script', 5 );
+
+/**
+ * Mark Google's library async, as its documentation shows.
+ *
+ * @since 1.1.0
+ *
+ * @param string $tag    Script tag.
+ * @param string $handle Script handle.
+ * @return string Filtered tag.
+ */
+function summarizewithai_async_google_button_script( $tag, $handle ) {
+	if ( 'google-swg-publisher' !== $handle || false !== strpos( $tag, ' async' ) ) {
+		return $tag;
+	}
+
+	return str_replace( '<script ', '<script async ', $tag );
+}
+add_filter( 'script_loader_tag', 'summarizewithai_async_google_button_script', 10, 2 );
+
+/**
+ * Whether the preferred-source button is expected somewhere on this request.
+ *
+ * Used to get Google's library into the head, which needs deciding before the
+ * content is rendered.
+ *
+ * @since 1.1.0
+ *
+ * @return bool True when the button will probably render.
+ */
+function summarizewithai_google_source_expected() {
+	if ( ! is_singular() ) {
+		return false;
+	}
+
+	$post = get_post();
+
+	if ( ! $post ) {
+		return false;
+	}
+
+	if ( has_shortcode( $post->post_content, 'summarizewithai_google_source' )
+		|| has_block( 'summarizewithai/google-source', $post ) ) {
+		return true;
+	}
+
+	$placement = (string) summarizewithai_get_option( 'google_source_placement' );
+
+	if ( 'none' === $placement ) {
+		return false;
+	}
+
+	// The three positions that travel with the AI row need that row present.
+	if ( in_array( $placement, array( 'inline_first', 'inline_last', 'with_buttons' ), true ) ) {
+		if ( has_shortcode( $post->post_content, 'summarizewithai' )
+			|| has_block( 'summarizewithai/buttons', $post ) ) {
+			return true;
+		}
+
+		$ai_types = array_filter( (array) summarizewithai_get_option( 'auto_post_types' ) );
+
+		return 'none' !== summarizewithai_get_option( 'auto_placement' )
+			&& $ai_types
+			&& is_singular( $ai_types );
+	}
+
+	$gs_types = array_filter( (array) summarizewithai_get_option( 'google_source_post_types' ) );
+
+	return (bool) ( $gs_types && is_singular( $gs_types ) );
+}
+
+/**
+ * Enqueue Google's library in the head when the official button is in use.
+ *
+ * @since 1.1.0
+ *
+ * @return void
+ */
+function summarizewithai_maybe_enqueue_google_button() {
+	if ( ! summarizewithai_uses_official_google_button() || ! summarizewithai_google_source_expected() ) {
+		return;
+	}
+
+	wp_enqueue_script( 'google-swg-publisher' );
+}
+add_action( 'wp_enqueue_scripts', 'summarizewithai_maybe_enqueue_google_button', 20 );
+
+/**
+ * Whether Google's own button is selected instead of the plugin's link.
+ *
+ * @since 1.1.0
+ *
+ * @return bool True when the official button should render.
+ */
+function summarizewithai_uses_official_google_button() {
+	return 'official' === summarizewithai_get_option( 'google_source_button' );
+}
+
+/**
+ * Get the language code handed to Google's button.
+ *
+ * @since 1.1.0
+ *
+ * @return string Language code, or an empty string to let the browser decide.
+ */
+function summarizewithai_get_google_button_lang() {
+	return (string) summarizewithai_get_option( 'google_source_lang' );
+}
+
+/**
  * Reduce whatever the user typed into a bare domain Google will accept.
  *
  * Accepts `example.com`, `www.example.com`, `https://example.com/blog/` and so
@@ -190,7 +347,8 @@ function summarizewithai_render_google_source( $args = array() ) {
 
 	$link = summarizewithai_get_google_source_link();
 
-	if ( '' === $link ) {
+	// Google's own button resolves the publication itself and needs no link.
+	if ( '' === $link && ! summarizewithai_uses_official_google_button() ) {
 		return '';
 	}
 
@@ -256,6 +414,37 @@ function summarizewithai_render_google_source( $args = array() ) {
 	$post_id   = (int) get_the_ID();
 
 	summarizewithai_enqueue_assets( $analytics );
+
+	/*
+	 * Google's own button renders itself from its library, so the plugin's
+	 * label, icon and colours do not apply to it. Only the wrapper, which
+	 * carries alignment, is ours.
+	 */
+	if ( summarizewithai_uses_official_google_button() ) {
+		if ( ! wp_script_is( 'google-swg-publisher', 'registered' ) ) {
+			summarizewithai_register_google_button_script();
+		}
+
+		// Normally already in the head; this covers a shortcode we could not
+		// predict, where the library lands in the footer instead.
+		wp_enqueue_script( 'google-swg-publisher' );
+
+		$classes[] = 'swi-google-source--official';
+		$lang      = summarizewithai_get_google_button_lang();
+
+		ob_start();
+		?>
+		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>">
+			<div google-add-preferred-source-btn
+				data-theme="<?php echo esc_attr( 'dark' === summarizewithai_get_option( 'google_source_theme' ) ? 'dark' : 'light' ); ?>"
+				<?php if ( '' !== $lang ) : ?>data-lang="<?php echo esc_attr( $lang ); ?>"<?php endif; ?>></div>
+		</div>
+		<?php
+		$html = (string) ob_get_clean();
+
+		/** This filter is documented below. */
+		return (string) apply_filters( 'summarizewithai_google_source_output', $html, $args );
+	}
 
 	$show_text  = ! $inline || ! empty( $args['show_text'] );
 	$link_class = $inline

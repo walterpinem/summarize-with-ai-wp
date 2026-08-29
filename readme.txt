@@ -74,7 +74,9 @@ Neither has a working prefill parameter. Gemini's web app ignores `?q=` and `?pr
 
 Google Search lets readers nominate sites they want to see more of. The button links to `google.com/preferences/source` for your domain, so a reader can add you in one click. It is about the site rather than any single post, so it sends no prompt and carries no AI service.
 
-**Settings > Summarize with AI > Google** offers seven placements: manual only (the default), as the first or last button among the AI buttons, in its own row below them, or on its own before the content, after it, or both. The inline placements use a second, shorter label so the button sits comfortably next to ChatGPT and Claude. You can also place it by hand with the `[summarizewithai_google_source]` shortcode or the "Add as Preferred Source on Google" block.
+You can render either the plugin's own link, which is the default and makes no request to Google, or Google's official branded button, which loads a script from news.google.com only on pages where the button appears.
+
+Google accepts domains and subdomains only, never subdirectories, and your site needs to appear in the source preferences tool already. **Settings > Summarize with AI > Google** offers seven placements: manual only (the default), as the first or last button among the AI buttons, in its own row below them, or on its own before the content, after it, or both. The inline placements use a second, shorter label so the button sits comfortably next to ChatGPT and Claude. You can also place it by hand with the `[summarizewithai_google_source]` shortcode or the "Add as Preferred Source on Google" block.
 
 = Why is my very long prompt cut off? =
 
@@ -89,6 +91,8 @@ The whole link, prompt included, is trimmed to 1800 characters so browsers and C
 
 = 1.1.0 =
 * Added: an "Add as a preferred source on Google" button, with its own shortcode, block and settings tab, seven placement modes including as the first or last button among the AI buttons, its own post-type list, a short inline label and an alignment setting.
+* Added: the option to render Google's official preferred-source button instead of the plugin's own link, with light and dark themes and a language override. Off by default, since it loads a script from news.google.com.
+* Added: a warning when a subdirectory is entered as the preferred-source domain, which Google does not accept, plus links to the source preferences tool and Google's documentation on the settings screen.
 * Added: Google AI Mode as a fifth AI service.
 * Added: per-service on/off switches.
 * Added: automatic placement before and/or after content, per post type, replacing the copy-and-paste theme functions.

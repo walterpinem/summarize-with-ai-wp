@@ -115,7 +115,7 @@ Google Search lets readers nominate sites they want to see more of. This button 
 
 It is about the site, not the post: no prompt, no AI service, and the same link on every page. Google's mark is multicolour, so the button keeps a neutral pill surface rather than a brand fill.
 
-**Settings → Summarize with AI → Google** offers five placements:
+**Settings → Summarize with AI → Google** offers seven placements:
 
 | Placement | Behaviour |
 |---|---|
@@ -144,7 +144,24 @@ Place it by hand with the block or the shortcode:
 | `align` | `left`, `center`, `right` | Horizontal alignment. |
 | `class` | CSS classes | Extra classes on the wrapper. |
 
-The domain is taken from your site URL, normalized to a bare host (`https://www.example.com/blog/` becomes `example.com`). Override it under the Google tab if you are working on a staging copy and need the live domain in the link.
+#### Two button options
+
+| Option | What renders |
+|---|---|
+| **This plugin's button** (default) | A plain link you control: your wording, your styling, and no request to Google from your visitors' browsers. |
+| **Google's official button** | Google's own branded widget, translated and maintained by them. Light and dark themes, plus a language override. |
+
+The official button is the one in [Google's preferred sources guide](https://developers.google.com/search/docs/appearance/preferred-sources). Choosing it loads `https://news.google.com/swg/js/v1/publisher.js` in the page head, but only on pages where the button actually appears — a site on the default setting never contacts Google at all. That third-party request is why it is opt-in.
+
+Its markup is Google's, so the plugin's label, colours and icon settings do not apply to it. Alignment still does.
+
+#### Eligibility and expectations
+
+Google accepts **domains and subdomains only**, never subdirectories: `example.com` and `news.example.com` are eligible, `example.com/blog` is not. The plugin normalizes whatever you enter down to the host (`https://www.example.com/blog/` becomes `example.com`) and warns you when it has dropped a path. Override the domain under the Google tab if you are on a staging copy and need the live domain in the link.
+
+Check that your site already appears in the source preferences tool before publishing the button; the settings screen links straight to it for your domain.
+
+Preferred Sources changes what each reader who opts in sees in Top Stories, and in AI Overviews and AI Mode where those exist. It does not change your rankings for everyone, and it does not guarantee placement.
 
 ## Placeholders
 

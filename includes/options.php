@@ -38,6 +38,9 @@ function summarizewithai_get_default_options() {
 		'google_source_placement'  => 'none',
 		'google_source_post_types' => array( 'post' ),
 		'google_source_align'      => 'left',
+		'google_source_button'     => 'plugin',
+		'google_source_theme'      => 'light',
+		'google_source_lang'       => '',
 		'google_source_label'      => __( 'Add {site_name} as a preferred source on Google', 'summarize-with-ai' ),
 		'google_source_inline_label' => __( 'Add on Google', 'summarize-with-ai' ),
 		'google_source_url'        => 'https://www.google.com/preferences/source?q=',
@@ -294,6 +297,18 @@ function summarizewithai_sanitize_options( $input ) {
 			: $defaults[ $key ];
 	}
 
+	$output['google_source_button'] = isset( $input['google_source_button'] ) && 'official' === $input['google_source_button']
+		? 'official'
+		: 'plugin';
+
+	$output['google_source_theme'] = isset( $input['google_source_theme'] ) && 'dark' === $input['google_source_theme']
+		? 'dark'
+		: 'light';
+
+	// A BCP 47 style language code, or empty to let the visitor's browser decide.
+	$lang = isset( $input['google_source_lang'] ) ? trim( (string) $input['google_source_lang'] ) : '';
+	$output['google_source_lang'] = preg_match( '/^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/', $lang ) ? $lang : '';
+
 	$submitted_domain = isset( $input['google_source_domain'] ) ? trim( (string) $input['google_source_domain'] ) : '';
 
 	$output['google_source_domain'] = summarizewithai_normalize_domain( $submitted_domain );
@@ -303,6 +318,16 @@ function summarizewithai_sanitize_options( $input ) {
 			'summarizewithai_bad_google_domain',
 			__( 'That did not look like a domain, so the Google preferred-source button will use this site instead. Enter something like example.com.', 'summarize-with-ai' ),
 			'error'
+		);
+	} elseif ( '' !== $output['google_source_domain'] && summarizewithai_looks_like_subdirectory( $submitted_domain ) ) {
+		summarizewithai_add_settings_error(
+			'summarizewithai_google_subdirectory',
+			sprintf(
+				/* translators: %s: the domain that was kept, for example example.com. */
+				__( 'Google only accepts domains and subdomains as preferred sources, not subdirectories, so the path was dropped and %s will be used.', 'summarize-with-ai' ),
+				$output['google_source_domain']
+			),
+			'warning'
 		);
 	}
 

@@ -418,7 +418,25 @@ $swi_tabs = array(
 		<div class="swi-tab-panel" id="swi-panel-google">
 			<h2 class="title"><?php esc_html_e( 'Add as a preferred source on Google', 'summarize-with-ai' ); ?></h2>
 			<p class="description">
-				<?php esc_html_e( 'Invites readers to mark your site as a preferred source in Google Search, so your articles are surfaced more prominently to them. This button is about the site rather than the post, so it carries no prompt.', 'summarize-with-ai' ); ?>
+				<?php esc_html_e( 'Invites readers to mark your site as a preferred source in Google Search. This button is about the site rather than the post, so it carries no prompt.', 'summarize-with-ai' ); ?>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'It changes what each reader who opts in sees in Top Stories, and in AI Overviews and AI Mode where those exist. It does not change your rankings for everyone, and it does not guarantee placement.', 'summarize-with-ai' ); ?>
+			</p>
+			<p class="description">
+				<?php
+				printf(
+					wp_kses(
+						/* translators: 1: source preferences tool URL, 2: link text, 3: Google documentation URL, 4: link text. */
+						__( 'Before publishing the button, check that your site already appears in <a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>. Only domains and subdomains are eligible, never subdirectories. See <a href="%3$s" target="_blank" rel="noopener noreferrer">%4$s</a>.', 'summarize-with-ai' ),
+						array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ) )
+					),
+					esc_url( summarizewithai_get_google_source_link() ),
+					esc_html__( 'the source preferences tool', 'summarize-with-ai' ),
+					esc_url( 'https://developers.google.com/search/docs/appearance/preferred-sources' ),
+					esc_html__( 'Google&#8217;s documentation', 'summarize-with-ai' )
+				);
+				?>
 			</p>
 
 			<table class="form-table" role="presentation">
@@ -469,6 +487,68 @@ $swi_tabs = array(
 								<?php endforeach; ?>
 								<p class="description">
 									<?php esc_html_e( 'Used by the three standalone placements above. The two inline placements and the "own row" option travel with the AI buttons, so they follow the AI post types instead.', 'summarize-with-ai' ); ?>
+								</p>
+							</fieldset>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Button', 'summarize-with-ai' ); ?></th>
+						<td>
+							<fieldset>
+								<legend class="screen-reader-text"><?php esc_html_e( 'Button', 'summarize-with-ai' ); ?></legend>
+
+								<label>
+									<input type="radio"
+										name="summarizewithai_options[google_source_button]"
+										value="plugin"
+										<?php checked( $swi_options['google_source_button'], 'plugin' ); ?> />
+									<?php esc_html_e( 'This plugin&#8217;s button', 'summarize-with-ai' ); ?>
+								</label>
+								<p class="description" style="margin-left:24px;">
+									<?php esc_html_e( 'A plain link you control: your own wording, your own styling, and no request to Google from your visitors&#8217; browsers.', 'summarize-with-ai' ); ?>
+								</p>
+
+								<label>
+									<input type="radio"
+										name="summarizewithai_options[google_source_button]"
+										value="official"
+										<?php checked( $swi_options['google_source_button'], 'official' ); ?> />
+									<?php esc_html_e( 'Google&#8217;s official button', 'summarize-with-ai' ); ?>
+								</label>
+								<p class="description" style="margin-left:24px;">
+									<?php esc_html_e( 'Google&#8217;s own branded button, translated by Google and kept up to date by them. It loads a script from news.google.com on pages where the button appears, so your visitors make a request to Google. The wording, colours and label settings below do not apply to it.', 'summarize-with-ai' ); ?>
+								</p>
+							</fieldset>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Google button options', 'summarize-with-ai' ); ?></th>
+						<td>
+							<fieldset>
+								<legend class="screen-reader-text"><?php esc_html_e( 'Google button options', 'summarize-with-ai' ); ?></legend>
+
+								<p>
+									<label for="swi-google-theme"><?php esc_html_e( 'Theme', 'summarize-with-ai' ); ?></label><br />
+									<select name="summarizewithai_options[google_source_theme]" id="swi-google-theme">
+										<option value="light" <?php selected( $swi_options['google_source_theme'], 'light' ); ?>><?php esc_html_e( 'Light', 'summarize-with-ai' ); ?></option>
+										<option value="dark" <?php selected( $swi_options['google_source_theme'], 'dark' ); ?>><?php esc_html_e( 'Dark', 'summarize-with-ai' ); ?></option>
+									</select>
+								</p>
+
+								<p>
+									<label for="swi-google-lang"><?php esc_html_e( 'Language', 'summarize-with-ai' ); ?></label><br />
+									<input type="text"
+										name="summarizewithai_options[google_source_lang]"
+										id="swi-google-lang"
+										value="<?php echo esc_attr( $swi_options['google_source_lang'] ); ?>"
+										class="small-text code"
+										placeholder="<?php echo esc_attr( substr( (string) determine_locale(), 0, 2 ) ); ?>" />
+								</p>
+
+								<p class="description">
+									<?php esc_html_e( 'Both apply to Google&#8217;s official button only. Leave the language empty to let each visitor&#8217;s browser decide, or enter a code such as en, ja or id.', 'summarize-with-ai' ); ?>
 								</p>
 							</fieldset>
 						</td>
