@@ -41,6 +41,7 @@
 	--swi-gs-border: rgba(0, 0, 0, 0.22);
 	--swi-gs-surface: #fff;
 	--swi-gs-text: #1f1f1f;
+	--swi-gs-official-width: 360px;
 	--swi-copy-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
 }
 
@@ -329,6 +330,42 @@
 	--swi-icon-size: 20px;
 
 	box-shadow: none;
+}
+
+/* Google's own button ------------------------------------------------------
+ *
+ * Google renders it inside a cross-origin iframe and forces the host element to
+ * "position: relative; width: 100%; min-height: 60px", with the iframe absolutely
+ * positioned to fill it. Two consequences, both verified against the live
+ * widget rather than assumed:
+ *
+ * 1. Alignment had nothing to do. A flex item already spanning the full width
+ *    leaves no free space for justify-content to distribute. Capping the width
+ *    gives the button its own footprint again, and auto margins then place it.
+ * 2. The iframe itself is transparent, in both light and dark themes. A white
+ *    band behind the button therefore comes from the page, not from Google:
+ *    most often a theme rule like "iframe { background: #fff }" meant to hide
+ *    the load flash on video embeds. The rule below overrides that without
+ *    !important, since it is two classes plus an element.
+ *
+ * Nothing inside the iframe can be styled from here. That part is Google's.
+ */
+
+.swi-google-source--official {
+	max-width: var(--swi-gs-official-width);
+}
+
+.swi-google-source--official.swi-align-center {
+	margin-inline: auto;
+}
+
+.swi-google-source--official.swi-align-right {
+	margin-inline-start: auto;
+	margin-inline-end: 0;
+}
+
+.swi-google-source--official iframe {
+	background: transparent;
 }
 
 /* Screen reader text, in case the active theme does not define it. */

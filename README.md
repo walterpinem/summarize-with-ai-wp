@@ -154,7 +154,11 @@ Place it by hand with the block or the shortcode:
 
 The official button is the one in [Google's preferred sources guide](https://developers.google.com/search/docs/appearance/preferred-sources). Choosing it loads `https://news.google.com/swg/js/v1/publisher.js` in the page head, but only on pages where the button actually appears — a site on the default setting never contacts Google at all. That third-party request is why it is opt-in.
 
-Its markup is Google's, so the plugin's label, colours and icon settings do not apply to it. Alignment still does.
+Its markup is Google's, so the plugin's label, colours and icon settings do not apply to it.
+
+Google renders that button inside a **cross-origin iframe** and forces the host element to `width: 100%`. Nothing inside the frame can be styled, and left alone the button spans the full content width with alignment having no effect. The plugin caps it at `--swi-gs-official-width` (default `360px`), which restores its own footprint and makes `align` work. Widen it if a translated label needs more room.
+
+The iframe is transparent in both themes, verified against the live widget. A solid band behind the button comes from your own CSS, not from Google: themes commonly ship `iframe { background: #fff }` to hide the load flash on video embeds. The plugin overrides that for its own button, without `!important`.
 
 #### Eligibility and expectations
 
@@ -268,6 +272,7 @@ The intended way to retheme, with no specificity fight at all. Set them on the w
 | `--swi-font-size`, `--swi-icon-size` | Button typography and icon |
 | `--swi-bg`, `--swi-bg-hover`, `--swi-fg` | Button colours (set inline per service) |
 | `--swi-gs-surface`, `--swi-gs-border`, `--swi-gs-text` | Google preferred-source button |
+| `--swi-gs-official-width` | Width cap for Google's official button (default `360px`) |
 | `--swi-text` | The label before the buttons |
 
 ### Classes

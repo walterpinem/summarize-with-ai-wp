@@ -620,6 +620,9 @@ $swi_tabs = array(
 								<p class="description">
 									<?php esc_html_e( 'Both apply to Google&#8217;s official button only. Leave the language empty to let each visitor&#8217;s browser decide, or enter a code such as en, ja or id.', 'summarize-with-ai' ); ?>
 								</p>
+								<p class="description">
+									<?php esc_html_e( 'Google renders that button inside its own frame and forces it to full width, so the plugin caps it at 360px to give it a real footprint and let the alignment above take effect. Widen or narrow it with the --swi-gs-official-width CSS property if a translated label needs more room.', 'summarize-with-ai' ); ?>
+								</p>
 							</fieldset>
 						</td>
 					</tr>
